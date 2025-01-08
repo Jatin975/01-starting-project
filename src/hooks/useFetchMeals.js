@@ -11,6 +11,7 @@ export function useFetchMeals() {
       try {
         setIsLoading(true);
         const mealsData = await fetchData("http://localhost:3000/meals");
+        
         setMeals(mealsData);
         setError(null);
       } catch (error) {

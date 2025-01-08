@@ -1,19 +1,22 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import logo from '../assets/logo.jpg'
+import CartContext from '../store/CardContext';
 
-export default function Navbar({ cartMeals, openModal, setOpenCheckout }) {
+export default function Navbar({ openModal, setOpenCart }) {
+  const cartCtx = useContext(CartContext);
+
   function handleOpenModal() {
-    if (cartMeals.length === 0) {
+    if (cartCtx.items.length === 0) {
       return
     }
-    setOpenCheckout(false);
+    setOpenCart(true);
     openModal(true);
   }
 
   return (
     <div id="main-header">
       <h1 id="title"> <img src={logo} alt="Food logo" />React Food</h1>
-      <button onClick={handleOpenModal}>{`Cart(${cartMeals.length})`}</button>
+      <button onClick={handleOpenModal}>{`Cart(${cartCtx.items.length})`}</button>
     </div>
   )
 }

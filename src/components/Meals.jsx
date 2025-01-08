@@ -1,40 +1,21 @@
-import React from 'react'
-import { useFetchMeals } from '../hooks/useFetchMeals'
-import cronParser from 'cron-parser';
-import dayjs from 'dayjs';
+import React, { useContext } from 'react'
+import { useFetchMeals } from '../hooks/useFetchMeals';
+import MealItem from './MealItem';
+import CartContext from '../store/CardContext';
 
-const imgPath = '../../backend/public/'
-
-
-export default function Meals({cartMeals, setCartMeals }) {
+export default function Meals() {
     const { meals, isLoading, error } = useFetchMeals();
+    const cardCtx = useContext(CartContext);
 
     function handleAddCartMeals(meal) {
-        if(cartMeals.some(x=>x.id === meal.id)){
-            return;
-        }
-
-        setCartMeals((prevState) => {
-            let updatedState = [...prevState];
-            let cartMeal = { ...meal, quantity: 1 };
-            updatedState.push(cartMeal);
-            return updatedState;
-        })
+        cardCtx.addItem(meal);
     }
+
     return (
         <div id='meals'>
             {!isLoading && meals.map((meal) => {
                 return (
-                    <div key={meal.id} className='meal-item'>
-                        <img src={`${imgPath}${meal.image}`} alt='taco' />
-                        <h3>{meal.name}</h3>
-                        <span className='meal-item-price'>${meal.price}</span>
-                        <p className='meal-item-description'>{meal.description}</p>
-                        <button
-                            className='meal-item-actions'
-                            onClick={() => handleAddCartMeals(meal)}
-                        >Add to cart</button>
-                    </div>
+                    <MealItem key={meal.id} meal={meal} handleAddCartMeals={handleAddCartMeals} />
                 )
             })}
             {isLoading && <h2>Fetching meals data...</h2>}

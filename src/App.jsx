@@ -2,65 +2,51 @@
 import Navbar from './components/Navbar';
 import Meals from './components/Meals';
 import { useState } from 'react';
-import { Box, Modal } from '@mui/material';
 import Cart from './components/Cart';
 import './index.css'
 import Checkout from './components/Checkout';
-
-const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 600,
-  bgcolor: '#e4ddd4',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-  color: 'black',
-  borderRadius: "6px"
-};
+import OrderCompletedDialog from './components/OrderCompletedDialog';
+import Dialog from './components/Dialog';
+import { CardContextProvider } from './store/CardContext';
 
 function App() {
   const [openModal, setOpenModal] = useState(false);
-  const [openCheckout, setOpenCheckout] = useState(false);
-  const [totalPrice, setTotalPrice] = useState(0);
-  const [cartMeals, setCartMeals] = useState([]);
+  const [openCart, setOpenCart] = useState(false);
+  const [isOrderSubmitted, setIsOrderSubmitted] = useState(false);
 
   const handleClose = () => {
     setOpenModal(false)
   };
 
+  const handleSuccessDialogClose = () => {
+    setIsOrderSubmitted(false);
+  }
+
   return (
-    <>
+    <CardContextProvider>
       <Navbar
-        cartMeals={cartMeals}
         openModal={setOpenModal}
-        setOpenCheckout={setOpenCheckout}
+        setOpenCart={setOpenCart}
       />
-      <Modal
+      <Dialog
         open={openModal}
       >
-        <Box sx={style}>
-          {openCheckout ?
-            <Checkout
-              totalPrice={totalPrice}
-              onClose={handleClose}
-            />
-            : <Cart
-              setCartMeals={setCartMeals}
-              cartMeals={cartMeals}
-              onClose={handleClose}
-              onCheckout={setOpenCheckout}
-              setTotalPrice={setTotalPrice}
-            />
-          }
-        </Box>
-      </Modal>
-      <Meals cartMeals={cartMeals} setCartMeals={setCartMeals} />
-
-    </>
+        {openCart ? <Cart
+          onClose={handleClose}
+          setOpenCart={setOpenCart}
+        /> :
+          <Checkout
+            onClose={handleClose}
+            onOrderSubmit={setIsOrderSubmitted}
+          />
+        }
+      </Dialog>
+      <Dialog open={isOrderSubmitted}>
+        <OrderCompletedDialog handleSuccessDialogClose={handleSuccessDialogClose} />
+      </Dialog>
+      <Meals />
+    </CardContextProvider>
   );
 }
 
-export default App;
+export default App
