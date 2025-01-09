@@ -1,1 +1,30 @@
-[]
+[
+    {
+        "items": [
+            {
+                "id": "m3",
+                "name": "Caesar Salad",
+                "price": "7.99",
+                "description": "Romaine lettuce tossed in Caesar dressing, topped with croutons and parmesan shavings.",
+                "image": "images/caesar-salad.jpg",
+                "quantity": 1
+            },
+            {
+                "id": "m2",
+                "name": "Margherita Pizza",
+                "price": "12.99",
+                "description": "A classic pizza with fresh mozzarella, tomatoes, and basil on a thin and crispy crust.",
+                "image": "images/margherita-pizza.jpg",
+                "quantity": 3
+            }
+        ],
+        "customer": {
+            "name": "Jatin Paul",
+            "email": "jatin.paul@artyasoftwares.com",
+            "street": "B-106, Navin apartment",
+            "postal-code": "110075",
+            "city": "Dwarka"
+        },
+        "id": "140.48032795621634"
+    }
+]
