@@ -1,9 +1,10 @@
 import React, { useContext, useState } from 'react'
-import { Box, Modal, TextField } from '@mui/material';
+import { Alert, TextField } from '@mui/material';
 import errorMessages from '../constants/errorMessages';
 import CartContext from '../store/CardContext';
 import UserProgressContext from '../store/UserProgressContext';
 import Dialog from './Dialog';
+import { sendOrder } from '../hooks/useHttp';
 
 const defaultFormValue = {
     fullName: "",
@@ -16,10 +17,10 @@ const defaultFormValue = {
 export default function Checkout() {
     const cartCtx = useContext(CartContext);
     const userProgressCtx = useContext(UserProgressContext);
-
     const [checkoutDetails, setCheckoutDetails] = useState(defaultFormValue);
-
     const [emailError, setEmailError] = useState(null);
+    const [orderSubmitError, setOrderSubmitError] = useState("");
+    const [isSending, setIsSending] = useState(false);
 
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -37,24 +38,26 @@ export default function Checkout() {
 
         let validForm = formValidation();
         if (validForm) {
-            const formData = new FormData(event.target);
-            const customerData = Object.fromEntries(formData.entries());
-            console.log("customer data", customerData);
-            fetch('http://localhost:3000/orders', {
-                method: "POST",
-                headers: {
-                    'Content-type': "application/json"
-                },
-                body: JSON.stringify({
+            try {
+                const formData = new FormData(event.target);
+                const customerData = Object.fromEntries(formData.entries());
+                setIsSending(true);
+                const responseData = await sendOrder("http://localhost:3000/orders", {
                     order: {
                         items: cartCtx.items,
-                        customer: customerData
+                        customer: customerData,
                     }
-                })
-            });
-            setCheckoutDetails(defaultFormValue);
-            cartCtx.resetItems();
-            userProgressCtx.showOrderSubmit();
+                });
+                console.log("reponse data", responseData);
+                setOrderSubmitError(null);
+                setCheckoutDetails(defaultFormValue);
+                cartCtx.resetItems();
+                userProgressCtx.showOrderSubmit();
+            } catch (error) {
+                setOrderSubmitError(error.message ?? "Error occured while calling the API");
+            } finally {
+                setIsSending(false);
+            }
         }
     }
 
@@ -78,7 +81,11 @@ export default function Checkout() {
 
     return (
         <Dialog open={userProgressCtx.openCheckout} onClose={userProgressCtx.hideModal}>
-            <div className='error-container'><h2>Error calling the API</h2></div>
+            {orderSubmitError &&
+                <Alert severity="error" onClose={() => setOrderSubmitError(false)} variant="filled" className='mb-4'>
+                    {orderSubmitError}
+                </Alert>
+            }
             <form onSubmit={handleCheckout}>
                 <h2 className="font-bold text-xl" >Checkout</h2>
                 <p className='my-3'>Total Amount: {cartCtx.totalPrice}</p>
@@ -144,13 +151,15 @@ export default function Checkout() {
                         />
                     </div>
                 </div>
-                <div className='flex justify-end'>
-                    <button type="button" className="py-2.5 px-5 me-2 mb-2 hover:text-gray-500 text-sm font-medium text-gray-900 focus:outline-none rounded-lg border border-gray-200 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-                        onClick={handleCloseCheckout}
-                    >Close</button>
-                    <button type="submit" className="focus:outline-none bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900"
-                    >Submit Order</button>
-                </div>
+                {isSending ? <p className="text-right">Sending the request...</p> :
+                    <div className='flex justify-end'>
+                        <button type="button" className="py-2.5 px-5 me-2 mb-2 hover:text-gray-500 text-sm font-medium text-gray-900 focus:outline-none rounded-lg border border-gray-200 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+                            onClick={handleCloseCheckout}
+                        >Close</button>
+                        <button type="submit" className="focus:outline-none bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900"
+                        >Submit Order</button>
+                    </div>
+                }
             </form>
         </Dialog>
     )
