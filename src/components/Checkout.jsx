@@ -1,6 +1,5 @@
 import React, { useContext, useState } from 'react'
 import { Alert, TextField } from '@mui/material';
-import errorMessages from '../constants/errorMessages';
 import CartContext from '../store/CardContext';
 import UserProgressContext from '../store/UserProgressContext';
 import Dialog from './Dialog';
@@ -18,54 +17,35 @@ export default function Checkout() {
     const cartCtx = useContext(CartContext);
     const userProgressCtx = useContext(UserProgressContext);
     const [checkoutDetails, setCheckoutDetails] = useState(defaultFormValue);
-    const [emailError, setEmailError] = useState(null);
     const [orderSubmitError, setOrderSubmitError] = useState("");
     const [isSending, setIsSending] = useState(false);
-
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-    const formValidation = () => {
-        let isFormValid = true;
-        if (!emailRegex.test(checkoutDetails.email)) {
-            isFormValid = false;
-            setEmailError(errorMessages.emailIsNotValid);
-        }
-        return isFormValid;
-    }
 
     const handleCheckout = async (event) => {
         event.preventDefault();
 
-        let validForm = formValidation();
-        if (validForm) {
-            try {
-                const formData = new FormData(event.target);
-                const customerData = Object.fromEntries(formData.entries());
-                setIsSending(true);
-                const responseData = await sendOrder("http://localhost:3000/orders", {
-                    order: {
-                        items: cartCtx.items,
-                        customer: customerData,
-                    }
-                });
-                console.log("reponse data", responseData);
-                setOrderSubmitError(null);
-                setCheckoutDetails(defaultFormValue);
-                cartCtx.resetItems();
-                userProgressCtx.showOrderSubmit();
-            } catch (error) {
-                setOrderSubmitError(error.message ?? "Error occured while calling the API");
-            } finally {
-                setIsSending(false);
-            }
+        try {
+            const fd = new FormData(event.target);
+            const customerData = Object.fromEntries(fd.entries());
+            setIsSending(true);
+            const responseData = await sendOrder("http://localhost:3000/orders", {
+                order: {
+                    items: cartCtx.items,
+                    customer: customerData,
+                }
+            });
+            console.log("reponse data", responseData);
+            setOrderSubmitError(null);
+            setCheckoutDetails(defaultFormValue);
+            cartCtx.resetItems();
+            userProgressCtx.showOrderSubmit();
+        } catch (error) {
+            setOrderSubmitError(error.message ?? "Error occured while calling the API");
+        } finally {
+            setIsSending(false);
         }
     }
 
     const handleCheckoutDetailsChange = (e, name) => {
-        if (name === "email") {
-            setEmailError(null);
-        }
-
         setCheckoutDetails((prevState) => {
             return {
                 ...prevState,
@@ -106,13 +86,12 @@ export default function Checkout() {
                         label="E-Mail Address"
                         id="email"
                         name='email'
+                        type="email"
                         variant="filled"
                         size="small"
                         className='w-80 rounded-md'
                         value={checkoutDetails.email}
                         onChange={(e) => handleCheckoutDetailsChange(e, "email")}
-                        error={emailError}
-                        helperText={emailError}
                     />
                     <TextField
                         required

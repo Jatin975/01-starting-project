@@ -19,7 +19,7 @@ export default function Navbar() {
   }
 
   return (
-    <div id="main-header">
+    <div id="main-header" className="sticky top-0" style={{ backgroundColor: "rgba(0,0,0,0.7)" }}>
       <h1 id="title"> <img src={logo} alt="Food logo" />React Food</h1>
       <button onClick={handleOpenModal} className={isCartEmpty ? `hover:cursor-not-allowed` : ""}>{`Cart(${totalItems})`}</button>
     </div>
