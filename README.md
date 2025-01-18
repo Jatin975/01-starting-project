@@ -24,7 +24,7 @@ Follow these steps to set up the project locally:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/food-order-website.git
+   git clone https://github.com/Jatin975/Food-order-app.git
    cd food-order-website
    
 2. Install npm packages 
