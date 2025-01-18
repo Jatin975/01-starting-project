@@ -68,7 +68,7 @@ export default function Checkout() {
             }
             <form onSubmit={handleCheckout}>
                 <h2 className="font-bold text-xl" >Checkout</h2>
-                <p className='my-3'>Total Amount: {cartCtx.totalPrice}</p>
+                <p className='my-3'>Total Amount: ${cartCtx.totalPrice}</p>
                 <div className='flex flex-col gap-4 mb-10'>
                     <TextField
                         required
